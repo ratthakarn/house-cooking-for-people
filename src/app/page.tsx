@@ -1,65 +1,158 @@
-import Image from "next/image";
+'use client'
+import { useEffect } from 'react'
+import { useApp } from '@/context/AppContext'
+import PageHeader from '@/components/PageHeader'
+import AccessibleButton from '@/components/AccessibleButton'
+import Link from 'next/link'
 
-export default function Home() {
+const MEAL_LABELS: Record<string, string> = {
+  breakfast: 'เช้า',
+  lunch: 'กลางวัน',
+  dinner: 'เย็น',
+  snack: 'ของว่าง',
+}
+
+export default function HomePage() {
+  const { todayMenus, removeTodayMenu, recipes, announce, settings } = useApp()
+  const today = new Date().toISOString().split('T')[0]
+  const menus = todayMenus.filter(m => m.date === today)
+
+  const textSize = settings.fontSize === 'xlarge' ? 'text-2xl' : settings.fontSize === 'large' ? 'text-xl' : 'text-lg'
+  const cardText = settings.fontSize === 'xlarge' ? 'text-3xl' : settings.fontSize === 'large' ? 'text-2xl' : 'text-xl'
+
+  const shoppingList = menus.flatMap(m => {
+    const recipe = recipes.find(r => r.id === m.recipeId)
+    return recipe?.ingredients || []
+  })
+
+  const handleRemove = (id: string, name: string) => {
+    removeTodayMenu(id)
+    announce(`ลบ ${name} ออกจากเมนูวันนี้แล้ว`)
+  }
+
+  const readShoppingList = () => {
+    if (shoppingList.length === 0) {
+      announce('ยังไม่มีรายการของที่ต้องซื้อ')
+      return
+    }
+    const text = 'รายการของที่ต้องซื้อ: ' + shoppingList.map(i => `${i.name} ${i.quantity} ${i.unit}`).join(', ')
+    announce(text)
+  }
+
+  const todayStr = new Date().toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div>
+      <PageHeader title="เมนูวันนี้" subtitle={todayStr} icon="🍽️" />
+
+      <div className="p-4 space-y-6">
+        {menus.length === 0 ? (
+          <div
+            role="status"
+            className="text-center py-12 bg-gray-800 rounded-2xl border-2 border-dashed border-gray-600"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <p className={`text-gray-400 ${textSize} mb-6`}>ยังไม่มีเมนูวันนี้</p>
+            <Link href="/recipes">
+              <AccessibleButton
+                announce="ไปเพิ่มเมนูจากสูตรอาหาร"
+                size="xl"
+                icon="📖"
+              >
+                เพิ่มเมนู
+              </AccessibleButton>
+            </Link>
+          </div>
+        ) : (
+          <section aria-label="เมนูวันนี้">
+            <h2 className={`font-bold text-amber-400 mb-3 ${textSize}`}>เมนูที่เลือกไว้</h2>
+            <ul className="space-y-3" role="list">
+              {menus.map(menu => (
+                <li
+                  key={menu.id}
+                  className="bg-gray-800 rounded-2xl border-2 border-gray-700 p-4 flex items-center justify-between gap-3"
+                >
+                  <div>
+                    <span className={`font-bold text-white ${cardText}`}>{menu.recipeName}</span>
+                    <span className={`ml-3 text-amber-300 ${textSize}`}>({MEAL_LABELS[menu.mealType]})</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Link href={`/recipes/${menu.recipeId}`}>
+                      <AccessibleButton
+                        size="md"
+                        variant="secondary"
+                        announce={`ดูวิธีทำ ${menu.recipeName}`}
+                        icon="👁️"
+                        aria-label={`ดูวิธีทำ ${menu.recipeName}`}
+                      >
+                        วิธีทำ
+                      </AccessibleButton>
+                    </Link>
+                    <AccessibleButton
+                      size="md"
+                      variant="danger"
+                      onClick={() => handleRemove(menu.id, menu.recipeName)}
+                      icon="🗑️"
+                      aria-label={`ลบ ${menu.recipeName} ออก`}
+                    >
+                      ลบ
+                    </AccessibleButton>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {shoppingList.length > 0 && (
+          <section aria-label="รายการของที่ต้องซื้อ">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className={`font-bold text-amber-400 ${textSize}`}>🛒 ของที่ต้องซื้อ</h2>
+              <AccessibleButton
+                size="md"
+                variant="ghost"
+                onClick={readShoppingList}
+                icon="🔊"
+                announce="อ่านรายการของที่ต้องซื้อ"
+              >
+                อ่าน
+              </AccessibleButton>
+            </div>
+            <ul className="space-y-2 bg-gray-800 rounded-2xl border-2 border-gray-700 p-4" role="list">
+              {shoppingList.map((item, i) => (
+                <li key={i} className={`flex justify-between text-gray-200 ${textSize} py-1 border-b border-gray-700 last:border-0`}>
+                  <span>{item.name}</span>
+                  <span className="text-amber-300 font-bold">{item.quantity} {item.unit}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <div className="grid grid-cols-2 gap-3">
+          <Link href="/recipes" className="block">
+            <AccessibleButton
+              size="xl"
+              variant="secondary"
+              icon="📖"
+              className="w-full"
+              announce="ไปที่สูตรอาหาร"
+            >
+              สูตรอาหาร
+            </AccessibleButton>
+          </Link>
+          <Link href="/timer" className="block">
+            <AccessibleButton
+              size="xl"
+              variant="secondary"
+              icon="⏱️"
+              className="w-full"
+              announce="ไปที่นาฬิกาจับเวลา"
+            >
+              จับเวลา
+            </AccessibleButton>
+          </Link>
         </div>
-      </main>
+      </div>
     </div>
-  );
+  )
 }
