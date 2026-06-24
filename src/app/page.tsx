@@ -45,12 +45,19 @@ export default function HomePage() {
       })
     })
     return Array.from(map.entries()).map(([name, { totalQty, unit }]) => {
-      const pantryItem = ingredients.find(i => i.name.trim() === name)
+      const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, '')
+      const normName = normalize(name)
+      const pantryItem = ingredients.find(i => {
+        const normPantry = normalize(i.name)
+        return normPantry === normName
+          || normPantry.includes(normName)
+          || normName.includes(normPantry)
+      })
       return {
         name,
         totalQty,
         unit,
-        inPantry: !!pantryItem && pantryItem.quantity >= totalQty,
+        inPantry: !!pantryItem && pantryItem.quantity > 0,
         pantryQty: pantryItem?.quantity ?? 0,
       }
     })
