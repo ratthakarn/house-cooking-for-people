@@ -22,6 +22,7 @@ export default function NavBar() {
       role="navigation"
       aria-label="เมนูหลัก"
       className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t-4 border-amber-500 z-50"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <ul className="flex justify-around items-stretch" role="list">
         {navItems.map(item => {

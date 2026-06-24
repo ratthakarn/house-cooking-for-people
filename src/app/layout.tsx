@@ -20,12 +20,18 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="th">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      </head>
       <body className={`${notoSansThai.className} bg-gray-950 text-white min-h-screen`}>
         <AuthProvider>
           <AppProvider>
             <AuthGuard>
               <SkipLink />
-              <main id="main-content" className="pb-24">
+              <main
+                id="main-content"
+                style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }}
+              >
                 {children}
               </main>
               <NavBar />
