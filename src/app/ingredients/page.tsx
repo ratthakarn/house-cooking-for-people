@@ -18,7 +18,7 @@ const CATEGORIES: { value: Ingredient['category']; label: string; icon: string }
   { value: 'other', label: 'อื่นๆ', icon: '📦' },
 ]
 
-const UNITS = ['กรัม', 'กิโลกรัม', 'มล.', 'ลิตร', 'ชิ้น', 'ถ้วย', 'ช้อนโต๊ะ', 'ช้อนชา', 'ฝัก', 'หัว', 'แผ่น']
+const UNITS = ['กรัม', 'กิโลกรัม', 'มล.', 'ลิตร', 'ชิ้น', 'ฟอง', 'ถ้วย', 'ช้อนโต๊ะ', 'ช้อนชา', 'ฝัก', 'หัว', 'ใบ', 'ต้น', 'ลูก', 'แผ่น']
 
 export default function IngredientsPage() {
   const { ingredients, addIngredient, updateIngredient, deleteIngredient, announce, settings } = useApp()
