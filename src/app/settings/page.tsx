@@ -6,9 +6,10 @@ import PageHeader from '@/components/PageHeader'
 import AccessibleButton from '@/components/AccessibleButton'
 import { AppSettings } from '@/types'
 import { exportToExcel } from '@/lib/exportExcel'
+import { importFromExcel } from '@/lib/importExcel'
 
 export default function SettingsPage() {
-  const { settings, updateSettings, announce, recipes, ingredients, todayMenus } = useApp()
+  const { settings, updateSettings, announce, recipes, ingredients, todayMenus, addRecipe, updateRecipe } = useApp()
   const { logout } = useAuth()
   const router = useRouter()
 
@@ -59,6 +60,35 @@ export default function SettingsPage() {
         }
       }
       reader.readAsText(file)
+    }
+    input.click()
+  }
+
+  const importExcel = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.xlsx,.xls'
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+      try {
+        announce('กำลังอ่านไฟล์ Excel รอสักครู่')
+        const imported = await importFromExcel(file)
+        let added = 0
+        let updated = 0
+        imported.forEach(recipe => {
+          const existing = recipes.find(r => r.id === recipe.id)
+          if (existing) { updateRecipe(recipe); updated++ }
+          else { addRecipe(recipe); added++ }
+        })
+        const msg = `นำเข้าสำเร็จ เพิ่มใหม่ ${added} สูตร อัปเดต ${updated} สูตร`
+        announce(msg)
+        alert(msg)
+      } catch (err) {
+        const msg = `เกิดข้อผิดพลาด: ${err}`
+        announce(msg)
+        alert(msg)
+      }
     }
     input.click()
   }
@@ -205,8 +235,11 @@ export default function SettingsPage() {
           >
             ส่งออก Excel (Google Sheets)
           </AccessibleButton>
-          <AccessibleButton size="xl" variant="secondary" icon="📥" onClick={importData} className="w-full" announce="นำเข้าข้อมูลสำรอง">
-            นำเข้าข้อมูล (Import)
+          <AccessibleButton size="xl" variant="secondary" icon="📥" onClick={importData} className="w-full" announce="นำเข้าข้อมูลสำรอง JSON">
+            นำเข้าข้อมูล JSON
+          </AccessibleButton>
+          <AccessibleButton size="xl" variant="secondary" icon="📊" onClick={importExcel} className="w-full" announce="นำเข้าจาก Excel หรือ Google Sheets">
+            นำเข้าจาก Excel / Google Sheets
           </AccessibleButton>
           <AccessibleButton size="xl" variant="danger" icon="🗑️" onClick={clearAll} className="w-full" announce="ลบข้อมูลทั้งหมด">
             ลบข้อมูลทั้งหมด
