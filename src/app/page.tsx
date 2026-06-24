@@ -52,13 +52,13 @@ export default function HomePage() {
             className="text-center py-12 bg-gray-800 rounded-2xl border-2 border-dashed border-gray-600"
           >
             <p className={`text-gray-400 ${textSize} mb-6`}>ยังไม่มีเมนูวันนี้</p>
-            <Link href="/recipes">
+            <Link href="/add-menu">
               <AccessibleButton
-                announce="ไปเพิ่มเมนูจากสูตรอาหาร"
+                announce="เลือกเมนูสำหรับวันนี้"
                 size="xl"
-                icon="📖"
+                icon="📅"
               >
-                เพิ่มเมนู
+                เพิ่มเมนูวันนี้
               </AccessibleButton>
             </Link>
           </div>
