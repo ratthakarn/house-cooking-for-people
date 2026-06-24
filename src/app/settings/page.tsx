@@ -9,7 +9,7 @@ import { exportToExcel } from '@/lib/exportExcel'
 import { importFromExcel } from '@/lib/importExcel'
 
 export default function SettingsPage() {
-  const { settings, updateSettings, announce, recipes, ingredients, todayMenus, addRecipe, updateRecipe } = useApp()
+  const { settings, updateSettings, announce, recipes, ingredients, todayMenus, addRecipe, updateRecipe, addIngredient, updateIngredient, addTodayMenu } = useApp()
   const { logout } = useAuth()
   const router = useRouter()
 
@@ -73,16 +73,26 @@ export default function SettingsPage() {
       if (!file) return
       try {
         announce('กำลังอ่านไฟล์ Excel รอสักครู่')
-        const imported = await importFromExcel(file)
-        let added = 0
-        let updated = 0
-        imported.forEach(recipe => {
+        const { recipes: importedRecipes, ingredients: importedIngredients, todayMenus: importedMenus } = await importFromExcel(file)
+
+        let recipeAdded = 0, recipeUpdated = 0
+        importedRecipes.forEach(recipe => {
           const existing = recipes.find(r => r.id === recipe.id)
-          if (existing) { updateRecipe(recipe); updated++ }
-          else { addRecipe(recipe); added++ }
+          if (existing) { updateRecipe(recipe); recipeUpdated++ }
+          else { addRecipe(recipe); recipeAdded++ }
         })
-        const msg = `นำเข้าสำเร็จ เพิ่มใหม่ ${added} สูตร อัปเดต ${updated} สูตร`
-        announce(msg)
+
+        let ingAdded = 0, ingUpdated = 0
+        importedIngredients.forEach(ing => {
+          const existing = ingredients.find(i => i.id === ing.id)
+          if (existing) { updateIngredient(ing); ingUpdated++ }
+          else { addIngredient(ing); ingAdded++ }
+        })
+
+        importedMenus.forEach(menu => addTodayMenu(menu))
+
+        const msg = `นำเข้าสำเร็จ!\nสูตรอาหาร: เพิ่ม ${recipeAdded} อัปเดต ${recipeUpdated}\nวัตถุดิบ: เพิ่ม ${ingAdded} อัปเดต ${ingUpdated}\nเมนูวันนี้: ${importedMenus.length} รายการ`
+        announce(`นำเข้าสำเร็จ สูตรอาหาร ${recipeAdded + recipeUpdated} สูตร วัตถุดิบ ${ingAdded + ingUpdated} รายการ`)
         alert(msg)
       } catch (err) {
         const msg = `เกิดข้อผิดพลาด: ${err}`
@@ -96,8 +106,7 @@ export default function SettingsPage() {
   const clearAll = () => {
     if (confirm('ต้องการลบข้อมูลทั้งหมดจริงหรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้')) {
       localStorage.clear()
-      announce('ลบข้อมูลทั้งหมดแล้ว กรุณารีเฟรชหน้า')
-      alert('ลบข้อมูลทั้งหมดแล้ว กรุณารีเฟรชหน้า')
+      window.location.reload()
     }
   }
 
@@ -229,7 +238,7 @@ export default function SettingsPage() {
             size="xl"
             variant="secondary"
             icon="📊"
-            onClick={() => { exportToExcel(recipes); announce('ดาวน์โหลดไฟล์ Excel แล้ว เปิดใน Google Sheets ได้เลย') }}
+            onClick={() => { exportToExcel(recipes, ingredients, todayMenus); announce('ดาวน์โหลดไฟล์ Excel แล้ว เปิดใน Google Sheets ได้เลย') }}
             className="w-full"
             announce="ส่งออกเป็น Excel สำหรับ Google Sheets"
           >
