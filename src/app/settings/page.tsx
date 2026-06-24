@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext'
 import PageHeader from '@/components/PageHeader'
 import AccessibleButton from '@/components/AccessibleButton'
 import { AppSettings } from '@/types'
+import { exportToExcel } from '@/lib/exportExcel'
 
 export default function SettingsPage() {
   const { settings, updateSettings, announce, recipes, ingredients, todayMenus } = useApp()
@@ -191,8 +192,18 @@ export default function SettingsPage() {
             <p>📖 สูตรอาหาร: {recipes.length} สูตร</p>
             <p>🥕 วัตถุดิบ: {ingredients.length} รายการ</p>
           </div>
-          <AccessibleButton size="xl" variant="secondary" icon="📤" onClick={exportData} className="w-full" announce="ส่งออกสำรองข้อมูล">
-            สำรองข้อมูล (Export)
+          <AccessibleButton size="xl" variant="secondary" icon="📤" onClick={exportData} className="w-full" announce="ส่งออกสำรองข้อมูล JSON">
+            สำรองข้อมูล JSON
+          </AccessibleButton>
+          <AccessibleButton
+            size="xl"
+            variant="secondary"
+            icon="📊"
+            onClick={() => { exportToExcel(recipes); announce('ดาวน์โหลดไฟล์ Excel แล้ว เปิดใน Google Sheets ได้เลย') }}
+            className="w-full"
+            announce="ส่งออกเป็น Excel สำหรับ Google Sheets"
+          >
+            ส่งออก Excel (Google Sheets)
           </AccessibleButton>
           <AccessibleButton size="xl" variant="secondary" icon="📥" onClick={importData} className="w-full" announce="นำเข้าข้อมูลสำรอง">
             นำเข้าข้อมูล (Import)
