@@ -32,27 +32,37 @@ export default function AIRecipeGenerator({ onGenerated }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, token }),
       })
-      const data = await res.json()
+
+      let data: { recipe?: Recipe; error?: string }
+      try {
+        data = await res.json()
+      } catch {
+        const text = await res.text().catch(() => '(ไม่มีข้อความ)')
+        setError(`Server ตอบกลับผิดรูปแบบ (${res.status}): ${text.slice(0, 200)}`)
+        announce('เกิดข้อผิดพลาดจาก Server')
+        setLoading(false)
+        return
+      }
+
       if (data.recipe) {
         const recipe: Recipe = {
           ...data.recipe,
           id: genId(),
           createdAt: new Date().toISOString(),
-          steps: data.recipe.steps.map((s: { order: number; instruction: string; durationMinutes?: number }) => ({
-            ...s,
-            id: genId(),
-          })),
+          steps: (data.recipe as Recipe).steps.map((s) => ({ ...s, id: genId() })),
         }
         onGenerated(recipe)
         announce(`สร้างสูตร ${recipe.name} สำเร็จแล้ว`)
         setPrompt('')
       } else {
-        setError(data.error || 'เกิดข้อผิดพลาด')
-        announce(data.error || 'เกิดข้อผิดพลาด กรุณาลองใหม่')
+        const msg = data.error || `เกิดข้อผิดพลาด (${res.status})`
+        setError(msg)
+        announce(msg)
       }
-    } catch {
-      setError('ไม่สามารถเชื่อมต่อได้ กรุณาลองใหม่')
-      announce('ไม่สามารถเชื่อมต่อได้')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      setError(`เชื่อมต่อไม่ได้: ${msg}`)
+      announce('เชื่อมต่อไม่ได้')
     }
     setLoading(false)
   }
