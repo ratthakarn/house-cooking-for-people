@@ -4,6 +4,7 @@ import { useApp } from '@/context/AppContext'
 import PageHeader from '@/components/PageHeader'
 import AccessibleButton from '@/components/AccessibleButton'
 import Link from 'next/link'
+import { exportMenuPng } from '@/lib/exportMenuPng'
 
 const MEAL_LABELS: Record<string, string> = {
   breakfast: 'เช้า',
@@ -74,6 +75,12 @@ export default function HomePage() {
   const handleRemove = (id: string, name: string) => {
     removeTodayMenu(id)
     announce(`ลบ ${name} ออกจากเมนูวันนี้แล้ว`)
+  }
+
+  const handleExportPng = () => {
+    if (menus.length === 0) { announce('ยังไม่มีเมนูวันนี้'); return }
+    exportMenuPng(menus, shoppingList, todayStr)
+    announce('บันทึกรูปภาพเมนูวันนี้แล้ว')
   }
 
   const readShoppingList = () => {
@@ -154,6 +161,19 @@ export default function HomePage() {
               ))}
             </ul>
           </section>
+        )}
+
+        {menus.length > 0 && (
+          <AccessibleButton
+            size="xl"
+            variant="secondary"
+            icon="🖼️"
+            className="w-full"
+            onClick={handleExportPng}
+            announce="บันทึกเมนูวันนี้เป็นรูปภาพ"
+          >
+            บันทึกเป็นรูปภาพ (.png)
+          </AccessibleButton>
         )}
 
         {shoppingList.length > 0 && (
