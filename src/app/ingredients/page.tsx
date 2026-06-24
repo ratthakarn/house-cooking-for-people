@@ -158,12 +158,19 @@ export default function IngredientsPage() {
           role="dialog"
           aria-modal="true"
           aria-label={editTarget ? `แก้ไข ${editTarget.name}` : 'เพิ่มวัตถุดิบใหม่'}
-          className="fixed inset-0 bg-black/80 z-50 flex items-end"
+          className="fixed inset-0 bg-gray-950 z-50 overflow-y-auto"
         >
-          <div className="bg-gray-900 border-t-4 border-amber-500 rounded-t-3xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-4">
-            <h2 className={`font-bold text-amber-400 ${settings.fontSize === 'xlarge' ? 'text-3xl' : 'text-2xl'}`}>
-              {editTarget ? '✏️ แก้ไขวัตถุดิบ' : '➕ เพิ่มวัตถุดิบ'}
-            </h2>
+          <div className="p-6 space-y-4" style={{ paddingBottom: 'calc(32px + env(safe-area-inset-bottom))' }}>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className={`font-bold text-amber-400 ${settings.fontSize === 'xlarge' ? 'text-3xl' : 'text-2xl'}`}>
+                {editTarget ? '✏️ แก้ไขวัตถุดิบ' : '➕ เพิ่มวัตถุดิบ'}
+              </h2>
+            </div>
+
+            <div className="flex gap-3">
+              <AccessibleButton size="xl" icon="💾" onClick={handleSave} className="flex-1">บันทึก</AccessibleButton>
+              <AccessibleButton size="xl" variant="ghost" icon="❌" onClick={() => setShowForm(false)} announce="ยกเลิก">ยกเลิก</AccessibleButton>
+            </div>
 
             <div>
               <label className={`block text-amber-300 font-bold mb-2 ${textSize}`}>ชื่อ *</label>
@@ -219,10 +226,6 @@ export default function IngredientsPage() {
                 className={inputCls} />
             </div>
 
-            <div className="flex gap-3">
-              <AccessibleButton size="xl" icon="💾" onClick={handleSave} className="flex-1">บันทึก</AccessibleButton>
-              <AccessibleButton size="xl" variant="ghost" icon="❌" onClick={() => setShowForm(false)} announce="ยกเลิก">ยกเลิก</AccessibleButton>
-            </div>
           </div>
         </div>
       )}
