@@ -4,11 +4,13 @@ import Link from 'next/link'
 import { useApp } from '@/context/AppContext'
 import PageHeader from '@/components/PageHeader'
 import AccessibleButton from '@/components/AccessibleButton'
+import AIRecipeGenerator from '@/components/AIRecipeGenerator'
+import { Recipe } from '@/types'
 
 const CATEGORIES = ['ทั้งหมด', 'อาหารเช้า', 'อาหารกลางวัน', 'อาหารเย็น', 'ของหวาน', 'เครื่องดื่ม', 'อื่นๆ']
 
 export default function RecipesPage() {
-  const { recipes, deleteRecipe, announce, settings } = useApp()
+  const { recipes, addRecipe, deleteRecipe, announce, settings } = useApp()
   const [filter, setFilter] = useState('ทั้งหมด')
   const [search, setSearch] = useState('')
 
@@ -32,9 +34,11 @@ export default function RecipesPage() {
       <PageHeader title="สูตรอาหาร" subtitle={`ทั้งหมด ${recipes.length} สูตร`} icon="📖" />
 
       <div className="p-4 space-y-4">
+        <AIRecipeGenerator onGenerated={(recipe: Recipe) => { addRecipe(recipe) }} />
+
         <Link href="/recipes/new">
-          <AccessibleButton size="xl" icon="➕" className="w-full" announce="เพิ่มสูตรอาหารใหม่">
-            เพิ่มสูตรอาหารใหม่
+          <AccessibleButton size="xl" variant="secondary" icon="➕" className="w-full" announce="เพิ่มสูตรอาหารเอง">
+            เพิ่มสูตรเอง
           </AccessibleButton>
         </Link>
 

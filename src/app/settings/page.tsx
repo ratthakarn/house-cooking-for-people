@@ -1,11 +1,15 @@
 'use client'
+import { useRouter } from 'next/navigation'
 import { useApp } from '@/context/AppContext'
+import { useAuth } from '@/context/AuthContext'
 import PageHeader from '@/components/PageHeader'
 import AccessibleButton from '@/components/AccessibleButton'
 import { AppSettings } from '@/types'
 
 export default function SettingsPage() {
   const { settings, updateSettings, announce, recipes, ingredients, todayMenus } = useApp()
+  const { logout } = useAuth()
+  const router = useRouter()
 
   const textSize = settings.fontSize === 'xlarge' ? 'text-2xl' : settings.fontSize === 'large' ? 'text-xl' : 'text-lg'
   const heading = settings.fontSize === 'xlarge' ? 'text-3xl' : settings.fontSize === 'large' ? 'text-2xl' : 'text-xl'
@@ -195,6 +199,20 @@ export default function SettingsPage() {
           </AccessibleButton>
           <AccessibleButton size="xl" variant="danger" icon="🗑️" onClick={clearAll} className="w-full" announce="ลบข้อมูลทั้งหมด">
             ลบข้อมูลทั้งหมด
+          </AccessibleButton>
+        </section>
+
+        <section className="bg-gray-800 rounded-2xl border-2 border-gray-700 p-5">
+          <h2 className={`font-bold text-amber-400 mb-3 ${heading}`}>🔐 บัญชีผู้ใช้</h2>
+          <AccessibleButton
+            size="xl"
+            variant="danger"
+            icon="🚪"
+            onClick={() => { logout(); router.replace('/login') }}
+            className="w-full"
+            announce="ออกจากระบบ"
+          >
+            ออกจากระบบ
           </AccessibleButton>
         </section>
 
